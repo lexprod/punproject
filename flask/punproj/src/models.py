@@ -2,6 +2,41 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
+puns_categories_table = db.Table(
+    'puns_categories',
+    db.Column(
+        'pun_id', db.Integer,
+        db.ForeignKey('puns.id'),
+        primary_key=True
+    ),
+
+    db.Column(
+        'category_id', db.Integer,
+        db.ForeignKey('categories.id'),
+        primary_key=True
+    )
+)
+
+ratings_table = db.Table (
+    'ratings',
+    db.Column(
+        'pun_id', db.Integer,
+        db.ForeignKey('puns.id', ondelete='CASCADE'),
+        primary_key=True
+    ),
+    
+    db.Column(
+        'user_id', db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        primary_key=True
+    ),
+    
+    db.Column(
+        'rating', db.Integer,
+    )
+)
+
 class Pun(db.Model):
     __tablename__ = "puns"
 
@@ -53,17 +88,3 @@ class Category(db.Model):
             'category_name': self.category_name
         }
     
-puns_categories_table = db.Table(
-    'puns_categories',
-    db.Column(
-        'pun_id', db.Integer,
-        db.ForeignKey('puns.id'),
-        primary_key=True
-    ),
-
-    db.Column(
-        'category_id', db.Integer,
-        db.ForeignKey('categories.id'),
-        primary_key=True
-    )
-)
