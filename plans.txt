@@ -2,3 +2,27 @@ currently setting up flask basic app for hello wrold testing
 once i get a base database up with dummy info and object relations i can work on dockerizing it
 
 I set alembic.ini to look for a database named punproj
+
+users
+PWD
+id 
+username
+
+puns 
+id 
+text
+
+categories
+id 
+name 
+
+puns_categories_table = db.Table(
+    'puns_categories',
+
+    table bridge for pun categories
+    many2many
+	
+	
+	
+Ran into issues so had to restart folder structure and flask from scratch
+setting up seed.py to generate records to work with
