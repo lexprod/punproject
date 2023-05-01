@@ -7,13 +7,15 @@ import string
 import hashlib
 import secrets
 from faker import Faker
-from punproj.src.models import User, Pun, Category, puns_categories_table, db
+from punproj.src.models import User, Pun, Category, puns_categories_table, ratings_table, db
 from punproj.src import create_app
 
 USER_COUNT = 50
 PUN_COUNT = 50
 CATEGORY_COUNT = 50
-RATINGS_COUNT = (USER_COUNT/2) * (PUN_COUNT/2)
+RATINGS_PER_USER = 10
+MIN_RATING = 1
+MAX_RATING = 5
 
 import random
 
@@ -80,6 +82,19 @@ def main():
         db.session.execute(insert_pun_cats_query)
         insert_pun_cats_query = puns_categories_table.insert().values(new_pun_cat2)
         db.session.execute(insert_pun_cats_query)
+    db.session.commit()
+
+    #apply random rating from users to puns,
+    #so iterate thru users
+    for u in user_ids:
+        #pick 10 puns to rate
+        puns_to_rate = random.sample(pun_ids, RATINGS_PER_USER)
+        for p in puns_to_rate:
+            #rate randomly 1-5
+            r = random.randint(MIN_RATING,MAX_RATING)
+            rating = [{"user_id": u, "pun_id": p, "rating": r}]
+            insert_rating_query = ratings_table.insert().values(rating)
+            db.session.execute(insert_rating_query)
     db.session.commit()
 
 
