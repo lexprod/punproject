@@ -13,6 +13,7 @@ from punproj.src import create_app
 USER_COUNT = 50
 PUN_COUNT = 50
 CATEGORY_COUNT = 50
+RATINGS_COUNT = (USER_COUNT/2) * (PUN_COUNT/2)
 
 import random
 
@@ -26,9 +27,9 @@ def truncate_tables():
 
 
 def generate_username():
-    faker = Faker()
+    fake = Faker()
     while True:
-        user_name = faker.first_name() + secrets.randbelow(1000).__str__().zfill(3)
+        user_name = fake.unique.first_name() + secrets.randbelow(1000).__str__().zfill(3)
         return user_name
 
 
@@ -59,10 +60,28 @@ def main():
     db.session.commit()
 
     for i in range(CATEGORY_COUNT):
-        category_name = fake.word()
+        category_name = fake.unique.word()
         category = Category(category_name=category_name)
         db.session.add(category)
     db.session.commit()
+
+    #apply random 2 categories to each puns
+    pun_ids = [pun.id for pun in Pun.query.all()]
+    category_ids = [category.id for category in Category.query.all()]
+    for i in pun_ids:
+        #pick 2 random categories
+        cat1 = random.choice(category_ids)
+        cat2 = random.choice(category_ids)
+        while cat1 == cat2:
+            cat2 = random.choice(category_ids)
+        new_pun_cat1 = [{"pun_id": i, "category_id": cat1}]
+        new_pun_cat2 = [{"pun_id": i, "category_id": cat2}]
+        insert_pun_cats_query = puns_categories_table.insert().values(new_pun_cat1)
+        db.session.execute(insert_pun_cats_query)
+        insert_pun_cats_query = puns_categories_table.insert().values(new_pun_cat2)
+        db.session.execute(insert_pun_cats_query)
+    db.session.commit()
+
 
 # run script
 main()
