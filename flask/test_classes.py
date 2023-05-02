@@ -1,6 +1,6 @@
 from punproj.src.models import User, Pun, Category, puns_categories_table, ratings_table, db
 from punproj.src import create_app
-import pytest
+
 
 def test_user_init():
     u1 = User('user', 'pw1')
