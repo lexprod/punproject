@@ -1,20 +1,17 @@
 from flask import Blueprint
 from flask import jsonify
 from flask import Blueprint
+from flask import abort, request
+from ..models import Pun
+from flask import current_app as app
 
-from flask.punproj.src.models import Pun
+bp = Blueprint('puns', __name__, url_prefix='/puns')
 
-bp = Blueprint('pun', __name__, url_prefix='/pun')
-
-# Get all puns
-@bp.route('/puns', methods=['GET'])
-def get_all_puns():
+@bp.route('', methods=['GET'])
+def index():
     puns = Pun.query.all()
-    results = [
-        {
-            "pun_id": pun.id,
-            "pun_text": pun.pun_text,
-            "author_id": pun.user_id
-        } for pun in puns]
+    results = []
+    for p in puns:
+        results.append(p.serialize())
 
-    return 'jsonify(results)'
+    return jsonify(results)
