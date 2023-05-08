@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, abort, request
-from ..models import User, db
+from ..models import User, db, Pun, ratings_table
 from flask import current_app as app
 import hashlib
 import secrets
@@ -42,14 +42,29 @@ def create():
     # user name, password required
     if 'user_name' not in request.json or 'password' not in request.json:
         return abort(400)
-    # construct user
+    # check for dupes
+    new_uname = request.json['user_name']
+    current_users = User.query.all()
+    for current_u in current_users:
+        if current_u.user_name == new_uname:
+            return abort(400, "Username already taken.")
     u = User(
-        user_name=request.json['user_name'],
+        user_name=new_uname,
         password=scramble(request.json['password'])
     )
     db.session.add(u)  # prepare CREATE statement
     db.session.commit()  # execute CREATE statement
     return jsonify(u.serialize())
+
+
+@bp.route('/<int:id>/puns', methods=['GET'])
+def user_pun_index(id: int):
+    #return json of all puns credited to id user
+    user = User.query.get(id)
+    if not user:
+        return abort(400, "User not found.")
+    user_puns = user.get_all_puns()
+    return jsonify(user_puns)
 
 
 
