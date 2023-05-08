@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: punproj
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: punproj
+  template:
+    metadata:
+      labels:
+        app: punproj
+    spec:
+      containers:
+        - args:
+          - python
+          - punproj/wsgi.py
+          - run
+          - --host=0.0.0.0
+          - --port=8000
+          name: punproj
+          image: awcflaskregistry.azurecr.io/punproj:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_HOST
+              value: "awcpunpostgres.postgres.database.azure.com"
+            - name: DATABASE_USER
+              value: "alertcaribou1"
+            - name: DATABASE_PASSWORD
+              value: "X7z9OsDaSshTFjAGAgR7Dw"
+            - name: DATABASE_NAME
+              value: "awcpundb"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - punproj
+              topologyKey: "kubernetes.io/hostname"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: punproj-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+  selector:
+    app: punproj
